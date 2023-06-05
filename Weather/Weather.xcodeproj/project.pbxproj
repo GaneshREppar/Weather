@@ -51,6 +51,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2DD08FB72A2DC2230016963F /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2DD08FB12A2D0D000016963F /* Weather.swift */,
+				2DD08FAC2A2CFD8B0016963F /* Forcast.swift */,
+				2DD08FAB2A2CFD8B0016963F /* List.swift */,
+				2DD08FAF2A2D0AF40016963F /* TempDetails.swift */,
+				2DD08FB32A2D19F60016963F /* City.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		2DDB3E7F2A2A55990011FDB8 = {
 			isa = PBXGroup;
 			children = (
@@ -70,15 +82,11 @@
 		2DDB3E8A2A2A55990011FDB8 /* Weather */ = {
 			isa = PBXGroup;
 			children = (
-				2DD08FB32A2D19F60016963F /* City.swift */,
-				2DD08FB12A2D0D000016963F /* Weather.swift */,
-				2DD08FAF2A2D0AF40016963F /* TempDetails.swift */,
-				2DD08FAB2A2CFD8B0016963F /* List.swift */,
-				2DD08FAC2A2CFD8B0016963F /* Forcast.swift */,
 				2DDB3E8B2A2A55990011FDB8 /* AppDelegate.swift */,
 				2DDB3E8D2A2A55990011FDB8 /* SceneDelegate.swift */,
-				2DDB3E8F2A2A55990011FDB8 /* SearchBarViewController.swift */,
+				2DD08FB72A2DC2230016963F /* Models */,
 				2DA0208E2A2B7EC0008B468D /* WeatherForcastViewController.swift */,
+				2DDB3E8F2A2A55990011FDB8 /* SearchBarViewController.swift */,
 				2DD08FB52A2D1BD60016963F /* WeatherForcastViewData.swift */,
 				2D2BB2C62A2BCA9500275B2C /* WeatherTableViewCell.swift */,
 				2DDB3E942A2A559A0011FDB8 /* Assets.xcassets */,

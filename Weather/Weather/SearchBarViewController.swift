@@ -34,6 +34,7 @@ class SearchBarViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func setupView() {
+        filterData = cityData
         view.backgroundColor = UIColor.white
         self.navigationItem.titleView = textField
         view.addSubview(tableView)
@@ -55,10 +56,10 @@ class SearchBarViewController: UIViewController, CLLocationManagerDelegate {
         // Set the leftViewMode property of the text field: You also need to set the leftViewMode property of the text field to .always. This will ensure that the padding view is always visible, even when there is no text in the text field.
         textField.leftViewMode = .always
         setupCurrentLocationButton()
-        setupLocation()
+        setupAndStartLocationManager()
     }
     
-    func setupLocation() {
+    func setupAndStartLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         locationManager.distanceFilter = kCLDistanceFilterNone;
@@ -76,37 +77,28 @@ class SearchBarViewController: UIViewController, CLLocationManagerDelegate {
     func actionTapped() {
         guard let currentLocation = currentLocation else { return  }
         let urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=\(currentLocation.coordinate.latitude)&lon=\(currentLocation.coordinate.longitude)&appid=b47727437835c094fdff60c4ced2a98c"
-        fetchData(urlString: urlString)
-        guard let weatherForcastViewData = weatherForcastViewData else { return }
-        self.navigationController?.pushViewController(WeatherForcastViewController(viewData: weatherForcastViewData), animated: true)
-        self.weatherForcastViewData = nil
+        fetchData(urlString: urlString) {
+            DispatchQueue.main.async {
+                self.launchWeatherForcastViewController()
+            }
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if !locations.isEmpty && currentLocation == nil {
             currentLocation = locations.first
             locationManager.stopUpdatingLocation()
-            requestForWeatherOnLocation()
         }
     }
 
-    func requestForWeatherOnLocation() {
-        guard let currentLocation = currentLocation else { return  }
-        
-        let long = currentLocation.coordinate.longitude
-        let lat = currentLocation.coordinate.latitude
-        print("==\(long), \(lat)==")
-    }
-
-    
-    private func fetchData(urlString: String) {
-        let dispatchQueue = DispatchQueue(label: "QueueIdentification", qos: .background)
-        dispatchQueue.sync{
+    private func fetchData(urlString: String, completion: @escaping () -> Void) {
+        DispatchQueue.global().async {
             guard let url = URL(string: urlString),
                   let data = try? Data(contentsOf: url) else {
                 return
             }
             self.parse(data: data)
+            completion()
         }
     }
     
@@ -135,14 +127,14 @@ extension SearchBarViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return searching
         ? filterData.count
-        : 0
+        : cityData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
         cell.textLabel?.text = searching
         ? filterData[indexPath.row]
-        : nil
+        : cityData[indexPath.row]
         cell.backgroundColor = UIColor.systemBlue
         return cell
     }
@@ -150,7 +142,14 @@ extension SearchBarViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let city = filterData[indexPath.row]
         let urlString = "https://api.openweathermap.org/data/2.5/forecast?q=\(city),in&APPID=b47727437835c094fdff60c4ced2a98c"
-        fetchData(urlString: urlString)
+        fetchData(urlString: urlString) {
+            DispatchQueue.main.async {
+                self.launchWeatherForcastViewController()
+            }
+        }
+    }
+
+    func launchWeatherForcastViewController() {
         guard let weatherForcastViewData = weatherForcastViewData else { return }
         self.navigationController?.pushViewController(WeatherForcastViewController(viewData: weatherForcastViewData), animated: true)
         self.weatherForcastViewData = nil
@@ -167,7 +166,7 @@ extension SearchBarViewController: UITextFieldDelegate {
     public func textField(_ textField: UITextField,
                           shouldChangeCharactersIn range: NSRange,
                           replacementString string: String) -> Bool {
-        
+        searching = true
         if let char = string.cString(using: String.Encoding.utf8) {
             let isBackSpace = strcmp(char, "\\b")
             if (isBackSpace == -92) {
@@ -186,26 +185,13 @@ extension SearchBarViewController: UITextFieldDelegate {
         
         //input text
         let searchText  = textField.text! + string
-        searching = searchText.count == 0 ? false : true
+
         //add matching text to arrya
         filterData = self.cityData.filter({ $0.localizedCaseInsensitiveContains(searchText) })
         
         tableView.reloadData()
         
         return true
-    }
-    
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        searching = true
-        filterData = cityData
-        tableView.reloadData()
-        return true
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        searching = false
-        filterData = []
-        tableView.reloadData()
     }
     
 }

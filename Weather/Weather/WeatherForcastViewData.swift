@@ -5,10 +5,9 @@
 //  Created by Ganesh Eppar on 05/06/23.
 //
 
-import UIKit
+import Foundation
 
-class WeatherForcastViewData: NSObject {
-    
+class WeatherForcastViewData {
     let forcastDescription: String?
     let city: String
     let currentTemp: Double?
@@ -20,5 +19,4 @@ class WeatherForcastViewData: NSObject {
         self.currentTemp = dayPredictions.first?.main.temp
         self.dayPredictions = dayPredictions
     }
-    
 }
